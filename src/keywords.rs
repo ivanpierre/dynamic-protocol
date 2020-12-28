@@ -12,8 +12,7 @@ use lazy_static::lazy_static;
 /// `Strings` are added incrementally to the `vect` `Vector` and cannot be destroyed.
 /// as a `String` is added, it's index is added in the `map` `HashMap`.
 /// # Examples
-/// ```
-///
+
 #[derive(Default)]
 #[derive(Debug)]
 pub struct Keywords {

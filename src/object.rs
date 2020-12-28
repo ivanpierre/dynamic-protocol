@@ -1,73 +1,97 @@
-//! # object: Defines Rust dynamic Objects.
+//! # Defines Rust dynamic Objects.
 //!
 //! Define immutable dynamic objects
-//! 
-//! 
-//! 
-//! 
-//! 
-//! 
-//! 
-//! 
-//! 
-//! 
-//! 
-//! 
+//!
+//!
+//!
+//!
+//!
+//!
+//!
+//!
+//!
+//!
+//!
+//!
 
 #![allow(non_snake_case)]
 
+use intertrait::CastFromSync;
+use lazy_static::lazy_static;
 use std::{any::*, fmt::Debug, result::*, sync::*};
 
 // use std::fmt::*;
-// use intertrait::*;
-// use intertrait::cast::*;
+use intertrait::cast::*;
+use intertrait::*;
 
-// use super::class::*;
+use super::null::*;
 // use super::rust_obj::*;
 
-trait DynTrait: Any + Debug + 'static + Send + Sync {}
-
+/// Dynamic `Object` structure
 pub struct Object {
-    pub content: Arc<dyn Any + 'static + Send + Sync>,
+    /// The `content` is an `Arc` reference of an `Any` protocol (Say anything we use). This enable to avoid to have a limited and non-dynamic `Enum` to define polymorphism.
+    pub content: Arc<dyn CastFromSync + 'static>,
 }
 
-trait IObject {
+castable_to!(Object => [sync] IObject, Debug);
+
+/// `IObject` `Protocol` for all defined `Object`s
+///
+///
+pub trait IObject {
+    /// Return `Class` of `Object`
     fn get_class(&self) -> &Object;
-    fn get_super(&self) -> &Object;
-    fn call(&self, name: &str) -> &Object;
-    fn get_member(&self, name: &str) -> &Object;
+
+    /// Call named `method` with `Object`s arguments
+    fn call(&self, name: &str, args: &[Object]) -> &Object;
+
+    /// Call getter for a named `member`
+    fn getter(&self, name: &str) -> &Object;
+
+    /// Return string representation of `Object`
     fn to_string(&self) -> String;
+
+    /// Return hashcode
     fn get_hash(&self) -> usize;
 }
 
 impl Object {
-    pub fn new<T>(content: Arc<T>) -> Object where
-    T: DynTrait, 
-    { 
+    /// Create new `object` of given Type
+    pub fn new<T>(content: Arc<T>) -> Object
+    where
+        T: CastFromSync + 'static,
+    {
         Object {
             content: content.clone(),
         }
     }
 
-    pub fn get<T>(&self) -> Option<&T> where 
-    T: Any + 'static + Send + Sync, 
-    {
-        // Return reference of pointed object
-        self.content.downcast_ref::<T>()
-    }
-    pub fn get_mut<T>(&self) -> Option<&mut T> where 
-    T: Any + 'static + Send + Sync, 
-    {
-        // Return reference of pointed object
-        self.content.downcast_mut::<T>()
-    }
-
+    /// Get hard count of `content`s Arc
     pub fn count(&self) -> usize {
         Arc::strong_count(&self.content)
     }
 
+    /// Get IObject's version of `Object`
+    pub fn get_object(obj: Arc<dyn CastFromSync>) -> Arc<dyn IObject> {
+        match obj.cast::<dyn IObject>() {
+            Ok(res) => res,
+            _ => panic!("ca va pas"),
+        }
+    }
+
+    /// Get protocol's version of `Object`
+    pub fn get<T>(self) -> &'static T {
+        match self.content.clone().cast::<&'static T>() {
+            Ok(res) => &*res,
+            _ => panic!("ca va pas"),
+        }
+    }
+
+    /// Initialize static data
     pub unsafe fn init() {
-        if INIT {return;}
+        if INIT {
+            return;
+        }
         INIT = true;
 
         // Insures all is initialized
@@ -76,16 +100,44 @@ impl Object {
 }
 
 impl Debug for Object {
+    /// Use Object's `content`'s format
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.fmt(self.content, f)        
+        self.fmt(self.content, f)
     }
 }
 
 impl Clone for Object {
+    /// clone `content` and create new object
     fn clone(&self) -> Self {
         Object {
             content: self.content.clone(),
         }
+    }
+}
+
+/// Implementation of protocol IObject for Object.
+///
+/// Functions are applied to the `content` of `Object`
+// #[cast_to([sync] IObject, Debug)];
+impl IObject for Object {
+    fn get_class(&self) -> &Object {
+        self.get_object().clone()
+    }
+
+    fn call(&self, name: &str, args: &[Object]) -> &Object {
+        self.get_object().clone(name, args)
+    }
+
+    fn getter(&self, name: &str) -> &Object {
+        self.get_object().getter(name)
+    }
+
+    fn to_string(&self) -> String {
+        self.get_object().to_string()
+    }
+
+    fn get_hash(&self) -> usize {
+        self.get_object().get_hash()
     }
 }
 

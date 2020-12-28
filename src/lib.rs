@@ -14,6 +14,7 @@ mod tests {
 
 pub mod object;
 pub mod keywords;
+pub mod null;
 // pub mod class;
 // pub mod implementation;
 // pub mod member;
