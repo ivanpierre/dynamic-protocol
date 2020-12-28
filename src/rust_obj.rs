@@ -3,8 +3,7 @@ use lazy_static::lazy_static;
 use im::vector::*;
 use std::sync::{Arc, RwLock};
 
-pub use crate::clojure;
-use crate::object::*;
+use super::object::*;
 
 
 #[derive(Default)]

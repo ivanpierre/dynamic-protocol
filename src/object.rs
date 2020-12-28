@@ -1,52 +1,65 @@
-//! clojure::rust::object: Defines the Rust equvalent of Java Objects.
+//! # object: Defines Rust dynamic Objects.
+//!
+//! Define immutable dynamic objects
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+
 #![allow(non_snake_case)]
 
-use std::{any::Any, mem::transmute, sync::*};
-use std::fmt::*;
-use intertrait::*;
-use intertrait::cast::*;
+use std::{any::*, fmt::Debug, result::*, sync::*};
 
-pub use crate::clojure;
-use crate::class::*;
-use crate::rust_obj::*;
+// use std::fmt::*;
+// use intertrait::*;
+// use intertrait::cast::*;
 
-#[derive(Debug)]
-struct Object {
-    content: Arc<dyn Any>,
+// use super::class::*;
+// use super::rust_obj::*;
+
+trait DynTrait: Any + Debug + 'static + Send + Sync {}
+
+pub struct Object {
+    pub content: Arc<dyn Any + 'static + Send + Sync>,
 }
 
-struct Null {}
-
-castable_to!(Null => [sync] Object);
-
 trait IObject {
-    fn get_class(self: Arc<Self>) -> Arc<Self>;
-    fn call(self: Arc<Self>) -> Self;
-    fn get(&self, name: &str) -> Self;
-    fn is_class(&self, class: &str) -> bool;
-    fn is_protocol(&self, protocol: &str) -> bool;
+    fn get_class(&self) -> &Object;
+    fn get_super(&self) -> &Object;
+    fn call(&self, name: &str) -> &Object;
+    fn get_member(&self, name: &str) -> &Object;
     fn to_string(&self) -> String;
     fn get_hash(&self) -> usize;
 }
 
-castable_to!(Data => [sync] Object, Debug);
-
-impl IObject for Null {
-
-}
-
 impl Object {
-    pub fn new<T>(content: Arc<T>) -> Object {
+    pub fn new<T>(content: Arc<T>) -> Object where
+    T: DynTrait, 
+    { 
         Object {
             content: content.clone(),
         }
     }
 
-    pub fn get<T>(&self) -> Arc<T> {
-        unsafe {
-            // Return reference of pointed object
-            transmute::<usize, Arc<T>>(self.content)
-        }
+    pub fn get<T>(&self) -> Option<&T> where 
+    T: Any + 'static + Send + Sync, 
+    {
+        // Return reference of pointed object
+        self.content.downcast_ref::<T>()
+    }
+    pub fn get_mut<T>(&self) -> Option<&mut T> where 
+    T: Any + 'static + Send + Sync, 
+    {
+        // Return reference of pointed object
+        self.content.downcast_mut::<T>()
     }
 
     pub fn count(&self) -> usize {
@@ -58,12 +71,15 @@ impl Object {
         INIT = true;
 
         // Insures all is initialized
-        Class::init();
+        // Class::init();
     }
 }
 
-static mut INIT: bool = false;
-
+impl Debug for Object {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.fmt(self.content, f)        
+    }
+}
 
 impl Clone for Object {
     fn clone(&self) -> Self {
@@ -72,3 +88,5 @@ impl Clone for Object {
         }
     }
 }
+
+static mut INIT: bool = false;

@@ -6,6 +6,10 @@ pub struct HashMap {
     map: hashmap::HashMap<Object, Object>,
 }
 
+impl IObject for HashMap {
+    
+}
+
 impl HashMap {
     pub unsafe fn init() {
         // only execute one time

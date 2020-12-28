@@ -1,8 +1,8 @@
 //! Anonymous Function with multi-arity
 
 use im::hashmap::HashMap;
-use crate::object::*;
-use crate::rust_obj::*;
+use super::object::*;
+use super::rust_obj::*;
 
 pub struct Function {
     pub higher: Option<usize>,

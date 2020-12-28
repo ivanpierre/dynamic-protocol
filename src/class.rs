@@ -1,12 +1,15 @@
 //! clojure::rust::class: Define class of objects
 
-pub use crate::clojure;
-use crate::object::Object;
-use crate::keywords::*;
-use clojure::lang::hashmap::HashMap;
+use super::object::Object;
+use super::keywords::*;
+use super::hashmap::HashMap;
 
 pub struct Class {
-    map: Object,
+    super_class:    Object, // Class
+    protocols:      Object, // HashSet of Protocols
+    members:        Object, // HashMap of Members
+    methods:        Object, // HashMap of Methods
+    functions:      Object, // HashMap of static functions
 }
 
 /// Class descriptor for Class :
@@ -34,7 +37,7 @@ impl Class {
                     map:        map.clone(),
                 };
         Object::new::<Class>(Keywords::get(name, *CORE),
-                                Box::new(ob)).clone()
+                             Arc::new(ob)).clone()
     }
     
     /// Initialize all objects needed to create the Class interface
