@@ -18,7 +18,7 @@
 
 use intertrait::CastFromSync;
 use lazy_static::lazy_static;
-use std::{any::*, fmt::Debug, result::*, sync::*};
+use std::{any::*, fmt::*, result::*, sync::*};
 
 // use std::fmt::*;
 use intertrait::cast::*;
@@ -33,20 +33,20 @@ pub struct Object {
     pub content: Arc<dyn CastFromSync + 'static>,
 }
 
-castable_to!(Object => [sync] IObject, Debug);
+// castable_to!(Object => [sync] IObject, Debug);
 
 /// `IObject` `Protocol` for all defined `Object`s
 ///
 ///
 pub trait IObject {
     /// Return `Class` of `Object`
-    fn get_class(&self) -> &Object;
+    fn get_class(&self) -> Object;
 
     /// Call named `method` with `Object`s arguments
-    fn call(&self, name: &str, args: &[Object]) -> &Object;
+    fn call(&self, name: &str, args: &[Object]) -> Object;
 
     /// Call getter for a named `member`
-    fn getter(&self, name: &str) -> &Object;
+    fn getter(&self, name: &str) -> Object;
 
     /// Return string representation of `Object`
     fn to_string(&self) -> String;
@@ -73,8 +73,8 @@ impl Object {
 
     /// Get IObject's version of `Object`
     pub fn get_object(obj: Arc<dyn CastFromSync>) -> Arc<dyn IObject> {
-        match obj.cast::<dyn IObject>() {
-            Ok(res) => res,
+        match obj.clone().cast::<dyn IObject>() {
+            Ok(res) => res.clone(),
             _ => panic!("ca va pas"),
         }
     }
@@ -102,7 +102,7 @@ impl Object {
 impl Debug for Object {
     /// Use Object's `content`'s format
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.fmt(self.content, f)
+        self.content.fmt(f)
     }
 }
 
@@ -120,24 +120,24 @@ impl Clone for Object {
 /// Functions are applied to the `content` of `Object`
 // #[cast_to([sync] IObject, Debug)];
 impl IObject for Object {
-    fn get_class(&self) -> &Object {
-        self.get_object().clone()
+    fn get_class(&self) -> Object {
+        Object::get_object(self.content.clone()).get_class()
     }
 
-    fn call(&self, name: &str, args: &[Object]) -> &Object {
-        self.get_object().clone(name, args)
+    fn call(&self, name: &str, args: &[Object]) -> Object {
+        Object::get_object(self.content.clone()).call(name, args)
     }
 
-    fn getter(&self, name: &str) -> &Object {
-        self.get_object().getter(name)
+    fn getter(&self, name: &str) -> Object {
+        Object::get_object(self.content.clone()).getter(name)
     }
 
     fn to_string(&self) -> String {
-        self.get_object().to_string()
+        Object::get_object(self.content.clone()).to_string()
     }
 
     fn get_hash(&self) -> usize {
-        self.get_object().get_hash()
+        Object::get_object(self.content.clone()).get_hash()
     }
 }
 
