@@ -67,7 +67,10 @@ fn test_null_valid() {
     println!("to_string = {:?}", a.to_string());
     println!("get_hash  = {:?}", a.get_hash());
     println!("get_class = {:?}", a.get_class().to_string());
-    println!("call      = {:?}", a.call("to_string", &[NULL]).to_string());
+    println!(
+        "call      = {:?}",
+        a.call("to_string", &[NULL,]).to_string()
+    );
 }
 
 fn test_vect() {}
