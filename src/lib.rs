@@ -3,6 +3,7 @@
 // ![warn(unreachable_pub, missing_docs)]
 #![allow(missing_docs)]
 #![allow(unused_imports)]
+#![allow(bare_trait_objects)]
 
 #[cfg(test)]
 mod tests {
@@ -12,9 +13,10 @@ mod tests {
     }
 }
 
-pub mod object;
 pub mod keywords;
 pub mod null;
+pub mod object;
+
 // pub mod class;
 // pub mod implementation;
 // pub mod member;

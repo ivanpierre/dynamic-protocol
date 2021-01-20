@@ -1,17 +1,14 @@
 //! Define Null object
 
-use intertrait::cast::*;
-use intertrait::*;
-
 use lazy_static::lazy_static;
-use std::{any::*, fmt::Debug, result::*, sync::*};
+use std::{fmt::*, result::*, sync::*};
 
 use super::object::*;
 
 /// Empty `Null` struct for null
 pub struct Null {}
 
-castable_to!(Null => [sync] IObject, Debug);
+// castable_to!(Null => [sync] IObject, Debug);
 
 // castable_to!(Object => IObject, Debug);
 
@@ -59,14 +56,18 @@ impl Null {
     }
 }
 
-lazy_static! {
-    pub static ref NULL: Object = Null::new();
-}
-
+static mut NULL: Object = Null::new();
 static mut INIT: bool = false;
 
 #[test]
 fn test_null_valid() {
     let a = Null::new();
-    println!("{:?}", a.to_string());
+    println!("Null values:");
+    println!("------------");
+    println!("to_string = {:?}", a.to_string());
+    println!("get_hash  = {:?}", a.get_hash());
+    println!("get_class = {:?}", a.get_class().to_string());
+    println!("call      = {:?}", a.call("to_string", &[NULL]).to_string());
 }
+
+fn test_vect() {}

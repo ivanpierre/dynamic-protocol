@@ -30,10 +30,8 @@ use super::null::*;
 /// Dynamic `Object` structure
 pub struct Object {
     /// The `content` is an `Arc` reference of an `Any` protocol (Say anything we use). This enable to avoid to have a limited and non-dynamic `Enum` to define polymorphism.
-    pub content: Arc<dyn CastFromSync + 'static>,
+    pub content: Arc<IObject>,
 }
-
-// castable_to!(Object => [sync] IObject, Debug);
 
 /// `IObject` `Protocol` for all defined `Object`s
 ///
@@ -59,7 +57,7 @@ impl Object {
     /// Create new `object` of given Type
     pub fn new<T>(content: Arc<T>) -> Object
     where
-        T: CastFromSync + 'static,
+        T: IObject,
     {
         Object {
             content: content.clone(),
@@ -67,22 +65,22 @@ impl Object {
     }
 
     /// Get hard count of `content`s Arc
-    pub fn count(&self) -> usize {
+    pub fn count(self) -> usize {
         Arc::strong_count(&self.content)
     }
 
     /// Get IObject's version of `Object`
-    pub fn get_object(obj: Arc<dyn CastFromSync>) -> Arc<dyn IObject> {
-        match obj.clone().cast::<dyn IObject>() {
-            Ok(res) => res.clone(),
+    pub fn get_object(obj: Arc<IObject>) -> Arc<IObject> {
+        match obj.clone().cast::<IObject>() {
+            Ok(res) => res,
             _ => panic!("ca va pas"),
         }
     }
 
     /// Get protocol's version of `Object`
-    pub fn get<T>(self) -> &'static T {
-        match self.content.clone().cast::<&'static T>() {
-            Ok(res) => &*res,
+    pub fn get<T>(obj: Arc<IObject>) -> Arc<T> {
+        match obj.clone().cast::<Arc<T>>() {
+            Ok(res) => res,
             _ => panic!("ca va pas"),
         }
     }
@@ -114,6 +112,8 @@ impl Clone for Object {
         }
     }
 }
+
+unsafe impl Send for Object {}
 
 /// Implementation of protocol IObject for Object.
 ///
