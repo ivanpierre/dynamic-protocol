@@ -1,9 +1,9 @@
 //! clojure::rust::keyword: keyword index
 
-use im::*;
 use im::hashmap::HashMap;
-use std::sync::*;
+use im::*;
 use lazy_static::lazy_static;
+use std::sync::*;
 
 /// A keyword storage structure
 ///
@@ -13,8 +13,7 @@ use lazy_static::lazy_static;
 /// as a `String` is added, it's index is added in the `map` `HashMap`.
 /// # Examples
 
-#[derive(Default)]
-#[derive(Debug)]
+#[derive(Default, Debug)]
 pub struct Keywords {
     map: HashMap<String, usize>,
     vect: Vector<String>,
@@ -62,10 +61,7 @@ impl Keywords {
                 v.push_back(k.clone());
                 m = m.update(k.clone(), length);
 
-                let k = Keywords {
-                    map: m,
-                    vect: v,
-                };
+                let k = Keywords { map: m, vect: v };
                 k.make_current(keywords);
 
                 // return new index that was length of vector
@@ -85,13 +81,12 @@ impl Keywords {
 
     pub fn to_string(index: usize, keywords: &RwLock<Arc<Keywords>>) -> String {
         match Keywords::current(keywords).vect.get(index) {
-            Some(key) => { String::from(key) }
-            None => {String::from("")}
+            Some(key) => String::from(key),
+            None => String::from(""),
         }
     }
 
-    pub unsafe fn init() {
-    }
+    pub unsafe fn init() {}
 }
 
 impl Drop for Keywords {
@@ -117,28 +112,44 @@ lazy_static! {
 #[test]
 fn test_keywords() {
     // Initial state
-    println!("Init state len = {:?} state = {:?}", Keywords::len(&CORE), Keywords::current(&CORE));
-    
+    println!(
+        "Init state len = {:?} state = {:?}",
+        Keywords::len(&CORE),
+        Keywords::current(&CORE)
+    );
+
     let e1 = Keywords::current(&CORE);
 
     // Call init_static
-    println!("New state len = {:?} state = {:?}", Keywords::len(&CORE), Keywords::current(&CORE));
+    println!(
+        "New state len = {:?} state = {:?}",
+        Keywords::len(&CORE),
+        Keywords::current(&CORE)
+    );
 
     let e2 = Keywords::current(&CORE);
 
     // add first keyword
     let o = Keywords::get(&String::from("essai"), &CORE);
-    println!("add essai len = {:?} state = {:?}", Keywords::len(&CORE), Keywords::current(&CORE));
+    println!(
+        "add essai len = {:?} state = {:?}",
+        Keywords::len(&CORE),
+        Keywords::current(&CORE)
+    );
 
     let e3 = Keywords::current(&CORE);
 
     // add second keyword
     Keywords::get(&"essai2".to_string(), &CORE);
-    println!("add essai2 len = {:?} state = {:?}", Keywords::len(&CORE), Keywords::current(&CORE));
+    println!(
+        "add essai2 len = {:?} state = {:?}",
+        Keywords::len(&CORE),
+        Keywords::current(&CORE)
+    );
 
     let e4 = Keywords::current(&CORE);
 
-    // display existing keywords                                
+    // display existing keywords
     println!("Keyword 0 = \"{}\"", Keywords::to_string(0, &CORE));
     println!("Keyword 1 = \"{}\"", Keywords::to_string(1, &CORE));
 
@@ -151,14 +162,13 @@ fn test_keywords() {
     println!("State 3 = {:?}", e3);
     println!("State 4 = {:?}", e4);
 
-    assert_eq!(1,1)
+    assert_eq!(1, 1)
 
     // display of droppings
     // At the output state 1 and 2 are the same and so only one drop,
     // event is there are two Arc, but it's a lone struct.
-    // State 3 is droped as it's the output of test function, and 
+    // State 3 is droped as it's the output of test function, and
     // e3 is the only link to the state.
     // As state 4 is linked in the KEYWORDS global variable, the drop
     // is not displayed..
 }
-

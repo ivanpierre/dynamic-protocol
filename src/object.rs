@@ -18,6 +18,7 @@
 
 use intertrait::CastFromSync;
 use lazy_static::lazy_static;
+use std::clone::Clone;
 use std::{any::*, fmt::*, result::*, sync::*};
 
 // use std::fmt::*;
@@ -27,118 +28,49 @@ use intertrait::*;
 use super::null::*;
 // use super::rust_obj::*;
 
-/// Dynamic `Object` structure
-pub struct Object {
-    /// The `content` is an `Arc` reference of an `Any` protocol (Say anything we use). This enable to avoid to have a limited and non-dynamic `Enum` to define polymorphism.
-    pub content: Arc<IObject>,
-}
+pub type Object = Arc<IObject + 'static>;
 
 /// `IObject` `Protocol` for all defined `Object`s
 ///
 ///
 pub trait IObject {
     /// Return `Class` of `Object`
-    fn get_class(&self) -> Object;
+    unsafe fn get_class(&self) -> Object;
 
     /// Call named `method` with `Object`s arguments
-    fn call(&self, name: &str, args: &[Object]) -> Object;
+    unsafe fn call(&self, name: &str, args: &[Object]) -> Object;
 
     /// Call getter for a named `member`
-    fn getter(&self, name: &str) -> Object;
+    unsafe fn getter(&self, name: &str) -> Object;
 
-    /// Return string representation of `Object`
-    fn to_string(&self) -> String;
+    /// Return string representation of
+    unsafe fn to_string(&self) -> String;
 
-    /// Return hashcode
-    fn get_hash(&self) -> usize;
+    unsafe fn get_hash(&self) -> usize;
 }
-
-impl Object {
-    /// Create new `object` of given Type
-    pub fn new<T>(content: Arc<T>) -> Object
-    where
-        T: IObject,
-    {
-        Object {
-            content: content.clone(),
-        }
-    }
-
-    /// Get hard count of `content`s Arc
-    pub fn count(self) -> usize {
-        Arc::strong_count(&self.content)
-    }
-
-    /// Get IObject's version of `Object`
-    pub fn get_object(obj: Arc<IObject>) -> Arc<IObject> {
-        match obj.clone().cast::<IObject>() {
-            Ok(res) => res,
-            _ => panic!("ca va pas"),
-        }
-    }
-
-    /// Get protocol's version of `Object`
-    pub fn get<T>(obj: Arc<IObject>) -> Arc<T> {
-        match obj.clone().cast::<Arc<T>>() {
-            Ok(res) => res,
-            _ => panic!("ca va pas"),
-        }
-    }
-
-    /// Initialize static data
-    pub unsafe fn init() {
-        if INIT {
-            return;
-        }
-        INIT = true;
-
-        // Insures all is initialized
-        // Class::init();
-    }
-}
-
-impl Debug for Object {
-    /// Use Object's `content`'s format
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.content.fmt(f)
-    }
-}
-
-impl Clone for Object {
-    /// clone `content` and create new object
-    fn clone(&self) -> Self {
-        Object {
-            content: self.content.clone(),
-        }
-    }
-}
-
-unsafe impl Send for Object {}
 
 /// Implementation of protocol IObject for Object.
 ///
 /// Functions are applied to the `content` of `Object`
 // #[cast_to([sync] IObject, Debug)];
 impl IObject for Object {
-    fn get_class(&self) -> Object {
-        Object::get_object(self.content.clone()).get_class()
+    unsafe fn get_class(&self) -> Object {
+        self.clone().get_class()
     }
 
-    fn call(&self, name: &str, args: &[Object]) -> Object {
-        Object::get_object(self.content.clone()).call(name, args)
+    unsafe fn call(&self, name: &str, args: &[Object]) -> Object {
+        self.get_class().call(name, args)
     }
 
-    fn getter(&self, name: &str) -> Object {
-        Object::get_object(self.content.clone()).getter(name)
+    unsafe fn getter(&self, name: &str) -> Object {
+        self.get_class().getter(name)
     }
 
-    fn to_string(&self) -> String {
-        Object::get_object(self.content.clone()).to_string()
+    unsafe fn to_string(&self) -> String {
+        self.get_class().to_string()
     }
 
-    fn get_hash(&self) -> usize {
-        Object::get_object(self.content.clone()).get_hash()
+    unsafe fn get_hash(&self) -> usize {
+        self.get_class().get_hash()
     }
 }
-
-static mut INIT: bool = false;

@@ -6,30 +6,30 @@ use std::{fmt::*, result::*, sync::*};
 use super::object::*;
 
 /// Empty `Null` struct for null
-pub struct Null {}
+pub struct Null;
 
 // castable_to!(Null => [sync] IObject, Debug);
 
 // castable_to!(Object => IObject, Debug);
 
 impl IObject for Null {
-    fn get_class(&self) -> Object {
+    unsafe fn get_class(&self) -> Object {
         NULL.clone()
     }
 
-    fn call(&self, name: &str, args: &[Object]) -> Object {
+    unsafe fn call(&self, name: &str, args: &[Object]) -> Object {
         NULL.clone()
     }
 
-    fn getter(&self, name: &str) -> Object {
+    unsafe fn getter(&self, name: &str) -> Object {
         NULL.clone()
     }
 
-    fn to_string(&self) -> String {
+    unsafe fn to_string(&self) -> String {
         String::from("Null")
     }
 
-    fn get_hash(&self) -> usize {
+    unsafe fn get_hash(&self) -> usize {
         0
     }
 }
@@ -42,7 +42,7 @@ impl Debug for Null {
 
 impl Null {
     fn new() -> Object {
-        Object::new::<Null>(Arc::new(Null {}))
+        Arc::new(Null)
     }
 
     pub unsafe fn init() {
@@ -50,9 +50,6 @@ impl Null {
             return;
         }
         INIT = true;
-
-        // Insures all is initialized
-        Object::init();
     }
 }
 
@@ -64,13 +61,15 @@ fn test_null_valid() {
     let a = Null::new();
     println!("Null values:");
     println!("------------");
-    println!("to_string = {:?}", a.to_string());
-    println!("get_hash  = {:?}", a.get_hash());
-    println!("get_class = {:?}", a.get_class().to_string());
-    println!(
-        "call      = {:?}",
-        a.call("to_string", &[NULL,]).to_string()
-    );
+    unsafe {
+        println!("to_string = {:?}", NULL.to_string());
+        println!("get_hash  = {:?}", NULL.get_hash());
+        println!("get_class = {:?}", NULL.get_class().to_string());
+        println!(
+            "call      = {:?}",
+            NULL.call("to_string", &[NULL]).to_string()
+        );
+    }
 }
 
-fn test_vect() {}
+pub(crate) fn test_vect() {}

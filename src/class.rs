@@ -32,20 +32,20 @@ pub struct Class {
 
 impl Class {
     pub fn new(name: String, map: Object) -> Object {
-        let ob = 
+        let ob =
                 Class {
                     map:        map.clone(),
                 };
         Object::new::<Class>(Keywords::get(name, *CORE),
                              Arc::new(ob)).clone()
     }
-    
+
     /// Initialize all objects needed to create the Class interface
     pub unsafe fn init() {
         // only execute one time
         if INIT {return;}
         INIT = true;
-        
+
         println!("Class::init");
 
         // Insures all is initialized
@@ -58,3 +58,4 @@ impl Class {
 }
 
 static INIT: bool = false;
+..const
