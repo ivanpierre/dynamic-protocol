@@ -2,7 +2,7 @@
 
 use im::hashmap::HashMap;
 use im::*;
-use lazy_static::lazy_static;
+use lazy_static::{__Deref, lazy_static};
 use std::sync::*;
 
 /// A keyword storage structure
@@ -79,13 +79,6 @@ impl Keywords {
         }
     }
 
-    pub fn to_string(index: usize, keywords: &RwLock<Arc<Keywords>>) -> String {
-        match Keywords::current(keywords).vect.get(index) {
-            Some(key) => String::from(key),
-            None => String::from(""),
-        }
-    }
-
     pub unsafe fn init() {}
 }
 
@@ -102,7 +95,7 @@ pub fn init_keywords() -> RwLock<Arc<Keywords>> {
 }
 
 lazy_static! {
-    /// Private access to static global `Keywords` struture.
+    /// Private access to static `Keywords` struture.
     ///
     /// Here will be stored and retrived keywords data.
     pub static ref KEYWORDS: RwLock<Arc<Keywords>> = init_keywords();
@@ -150,11 +143,20 @@ fn test_keywords() {
     let e4 = Keywords::current(&CORE);
 
     // display existing keywords
-    println!("Keyword 0 = \"{}\"", Keywords::to_string(0, &CORE));
-    println!("Keyword 1 = \"{}\"", Keywords::to_string(1, &CORE));
+    println!(
+        "Keyword 0 = \"{}\"",
+        Keywords::current(&CORE).vect.get(0).unwrap()
+    );
 
-    // display inexisting keyword -> ""
-    println!("Keyword 2 = \"{}\"", Keywords::to_string(2, &CORE));
+    println!(
+        "Keyword 1 = \"{}\"",
+        Keywords::current(&CORE).vect.get(1).unwrap()
+    );
+
+    println!(
+        "Keyword 2 = \"{}\"",
+        Keywords::current(&CORE).vect.get(2).unwrap()
+    );
 
     // Verify persistant state
     println!("State 1 = {:?}", e1);
