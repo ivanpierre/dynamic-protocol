@@ -43,7 +43,16 @@ impl Keywords {
         Keywords::current(keywords).vect.len()
     }
 
-    pub fn get(key: &str, keywords: &RwLock<Arc<Keywords>>) -> usize {
+    pub fn get_id(key: usize, keywords: &RwLock<Arc<Keywords>>) -> String {
+        let v = &Keywords::current(keywords).vect;
+        if v.len() < key + 1 {
+            String::from("...vide...")
+        } else {
+            v.get(key).unwrap().clone()
+        }
+    }
+
+    pub fn get_key(key: &str, keywords: &RwLock<Arc<Keywords>>) -> usize {
         let i = Keywords::current(keywords).clone();
         let a = i.as_ref();
         let mut m = a.map.clone();
@@ -123,7 +132,7 @@ fn test_keywords() {
     let e2 = Keywords::current(&CORE);
 
     // add first keyword
-    let o = Keywords::get(&String::from("essai"), &CORE);
+    let o = Keywords::get_key(&String::from("essai"), &CORE);
     println!(
         "add essai len = {:?} state = {:?}",
         Keywords::len(&CORE),
@@ -133,7 +142,7 @@ fn test_keywords() {
     let e3 = Keywords::current(&CORE);
 
     // add second keyword
-    Keywords::get(&"essai2".to_string(), &CORE);
+    Keywords::get_key(&"essai2".to_string(), &CORE);
     println!(
         "add essai2 len = {:?} state = {:?}",
         Keywords::len(&CORE),
@@ -143,20 +152,9 @@ fn test_keywords() {
     let e4 = Keywords::current(&CORE);
 
     // display existing keywords
-    println!(
-        "Keyword 0 = \"{}\"",
-        Keywords::current(&CORE).vect.get(0).unwrap()
-    );
-
-    println!(
-        "Keyword 1 = \"{}\"",
-        Keywords::current(&CORE).vect.get(1).unwrap()
-    );
-
-    println!(
-        "Keyword 2 = \"{}\"",
-        Keywords::current(&CORE).vect.get(2).unwrap()
-    );
+    println!("Keyword 0 = \"{}\"", Keywords::get_id(0, &CORE));
+    println!("Keyword 1 = \"{}\"", Keywords::get_id(1, &CORE));
+    println!("Keyword 2 = \"{}\"", Keywords::get_id(2, &CORE));
 
     // Verify persistant state
     println!("State 1 = {:?}", e1);

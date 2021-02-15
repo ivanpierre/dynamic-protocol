@@ -2,7 +2,7 @@
 //!
 
 // use std::sync::Arc;
-use std::fmt::Debug;
+// use std::fmt::Debug;
 //  se std::mem::transmute;
 
 use super::object::Object;
@@ -18,7 +18,7 @@ trait Number {
     fn float_value(&self) -> Object;
 }
 
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct BigInteger {
     value: i128,
 }

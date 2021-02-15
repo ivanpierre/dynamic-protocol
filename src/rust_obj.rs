@@ -1,10 +1,9 @@
 // use std::sync::*;
-use lazy_static::lazy_static;
 use im::vector::*;
+use lazy_static::lazy_static;
 use std::sync::{Arc, RwLock};
 
 use super::object::*;
-
 
 #[derive(Default)]
 pub struct RustObj {
@@ -21,16 +20,16 @@ impl RustObj {
     }
 
     pub fn update(name: usize, obj: Object) {
-        RustObj{objects: RustObj::current()
-                .objects
-                .update(name, obj.clone())}.make_current();
+        RustObj {
+            objects: RustObj::current().objects.update(name, obj.clone()),
+        }
+        .make_current();
     }
 
     pub fn get(index: usize) -> Object {
-        match RustObj::current().objects.get(index)
-        {
-            Some(obj) => {obj.clone()}
-            None => {RustObj::null()}
+        match RustObj::current().objects.get(index) {
+            Some(obj) => obj.clone(),
+            None => RustObj::null(),
         }
     }
 
@@ -40,7 +39,10 @@ impl RustObj {
 }
 
 pub fn init() {
-    RustObj { objects: Vector::<Object>::new(), }.make_current()
+    RustObj {
+        objects: Vector::<Object>::new(),
+    }
+    .make_current()
 }
 
 lazy_static! {
@@ -49,7 +51,4 @@ lazy_static! {
 }
 
 #[test]
-fn test_rust_obj() {
-    
-
-}
+fn test_rust_obj() {}

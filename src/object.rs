@@ -5,10 +5,9 @@
 
 #![allow(non_snake_case)]
 
-use intertrait::CastFromSync;
 use lazy_static::{__Deref, lazy_static};
 use std::clone::Clone;
-use std::{any::*, fmt::*, result::*, sync::*};
+use std::{any::*, fmt::*, hash::*, result::*, sync::*};
 
 // use std::fmt::*;
 use intertrait::cast::*;
@@ -17,17 +16,21 @@ use intertrait::*;
 use super::class::*;
 // use super::rust_obj::*;
 
+pub trait Inner: IObject + Debug + Eq + Hash + CastFromSync {}
+
 /// Basic definition of object inner link to real structure
-pub type Inner = IObject + 'static;
+// pub type Inner = IObject;
 
 /// Basic definition of a dynamic object
 // pub type Object = Option<Arc<Inner>>;
 pub struct Object {
-    pub inner: Option<Arc<Inner>>,
+    pub inner: Option<Arc<IObject>>,
 }
 
+castable_to!(Object => IObject);
+
 impl Object {
-    pub fn new<T: IObject + 'static>(obj: T) -> Object {
+    pub fn new<T: Inner>(obj: T) -> Object {
         Object {
             inner: Some(Arc::new(obj)),
         }
@@ -60,9 +63,9 @@ impl Object {
 }
 
 /// `IObject` `Protocol` for all defined `Object`s
-///rachel maddow
 ///
-pub trait IObject {
+///
+pub trait IObject: CastFromSync {
     /// Return `Class` of `Object`
     fn get_class<'a>(&self) -> &'a Class;
 
@@ -70,12 +73,16 @@ pub trait IObject {
     fn call(&self, name: &str, obj: &Object, args: &[Object]) -> Object;
 
     /// Call getter for a named `member`
-    fn getter(&self, name: &str, obj: &Object) -> Object;
+    fn get(&self, name: &str, obj: &Object) -> Object;
 
     /// Return string representation of
     fn to_string(&self, obj: &Object) -> String;
 
     fn get_hash(&self, obj: &Object) -> usize;
+
+    // fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    //     f.write_str(&self.to_string(self)
+    // }
 }
 
 const NILSTRING: &str = "nil";
@@ -103,12 +110,12 @@ impl IObject for Object {
         }
     }
 
-    fn getter(&self, name: &str, obj: &Object) -> Object {
+    fn get(&self, name: &str, obj: &Object) -> Object {
         match self.clone().inner {
             None => panic!("Getter on nil"),
             Some(o) => {
                 let a = o.clone();
-                a.get_class().getter(name, obj)
+                a.get_class().get(name, obj)
             }
         }
     }
@@ -134,6 +141,13 @@ impl IObject for Object {
     }
 }
 
+impl std::fmt::Debug for Object {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let a = self;
+        f.write_str(&self.to_string(self))
+    }
+}
+
 impl Clone for Object {
     fn clone_from(&mut self, source: &Self) {
         *self = source.clone();
@@ -147,6 +161,20 @@ impl Clone for Object {
                 inner: Some(o.clone()),
             },
         }
+    }
+}
+
+impl Eq for Object {}
+
+impl PartialEq for Object {
+    fn eq(&self, other: &Self) -> bool {
+        todo!()
+    }
+}
+
+impl Hash for Object {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        todo!()
     }
 }
 
