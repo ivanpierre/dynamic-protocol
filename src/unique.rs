@@ -14,37 +14,37 @@ use std::sync::*;
 /// # Examples
 
 #[derive(Default, Debug)]
-pub struct Keywords {
+pub struct Unique {
     map: HashMap<String, usize>,
     vect: Vector<String>,
 }
 
-impl Keywords {
-    pub fn new() -> Keywords {
-        Keywords {
+impl Unique {
+    pub fn new() -> Unique {
+        Unique {
             map: HashMap::<String, usize>::new(),
             vect: Vector::<String>::new(),
         }
     }
 
-    pub fn current(keywords: &RwLock<Arc<Keywords>>) -> Arc<Keywords> {
+    pub fn current(keywords: &RwLock<Arc<Unique>>) -> Arc<Unique> {
         keywords.read().unwrap().clone()
     }
 
-    pub fn current_mut(keywords: &RwLock<Arc<Keywords>>) -> Arc<Keywords> {
+    pub fn current_mut(keywords: &RwLock<Arc<Unique>>) -> Arc<Unique> {
         keywords.write().unwrap().clone()
     }
 
-    pub fn make_current(self, keywords: &RwLock<Arc<Keywords>>) {
+    pub fn make_current(self, keywords: &RwLock<Arc<Unique>>) {
         *keywords.write().unwrap() = Arc::new(self);
     }
 
-    pub fn len(keywords: &RwLock<Arc<Keywords>>) -> usize {
-        Keywords::current(keywords).vect.len()
+    pub fn len(keywords: &RwLock<Arc<Unique>>) -> usize {
+        Unique::current(keywords).vect.len()
     }
 
-    pub fn get_id(key: usize, keywords: &RwLock<Arc<Keywords>>) -> String {
-        let v = &Keywords::current(keywords).vect;
+    pub fn get_id(key: usize, keywords: &RwLock<Arc<Unique>>) -> String {
+        let v = &Unique::current(keywords).vect;
         if v.len() < key + 1 {
             String::from("...vide...")
         } else {
@@ -52,12 +52,12 @@ impl Keywords {
         }
     }
 
-    pub fn get_key(key: &str, keywords: &RwLock<Arc<Keywords>>) -> usize {
-        let i = Keywords::current(keywords).clone();
+    pub fn get_key(key: &str, keywords: &RwLock<Arc<Unique>>) -> usize {
+        let i = Unique::current(keywords).clone();
         let a = i.as_ref();
         let mut m = a.map.clone();
         let mut v = a.vect.clone();
-        let length = Keywords::len(keywords);
+        let length = Unique::len(keywords);
 
         let k = key.to_string();
         match m.get(&k) {
@@ -70,7 +70,7 @@ impl Keywords {
                 v.push_back(k.clone());
                 m = m.update(k.clone(), length);
 
-                let k = Keywords { map: m, vect: v };
+                let k = Unique { map: m, vect: v };
                 k.make_current(keywords);
 
                 // return new index that was length of vector
@@ -79,8 +79,8 @@ impl Keywords {
         }
     }
 
-    pub fn test(key: String, keywords: &RwLock<Arc<Keywords>>) -> bool {
-        let i = Keywords::current(keywords).clone();
+    pub fn test(key: String, keywords: &RwLock<Arc<Unique>>) -> bool {
+        let i = Unique::current(keywords).clone();
         let a = i.as_ref();
         match a.map.get(&key) {
             Some(_) => true,
@@ -91,7 +91,7 @@ impl Keywords {
     pub unsafe fn init() {}
 }
 
-impl Drop for Keywords {
+impl Drop for Unique {
     fn drop(&mut self) {
         println!("Dropping Keyword state! -> {:?}", self);
     }
@@ -99,7 +99,7 @@ impl Drop for Keywords {
 
 static INIT: bool = false;
 
-pub fn init_keywords() -> RwLock<Arc<Keywords>> {
+pub fn init_keywords() -> RwLock<Arc<Unique>> {
     RwLock::new(Arc::new(Default::default()))
 }
 
@@ -107,8 +107,8 @@ lazy_static! {
     /// Private access to static `Keywords` struture.
     ///
     /// Here will be stored and retrived keywords data.
-    pub static ref KEYWORDS: RwLock<Arc<Keywords>> = init_keywords();
-    pub static ref CORE: RwLock<Arc<Keywords>> = init_keywords();
+    pub static ref KEYWORDS: RwLock<Arc<Unique>> = init_keywords();
+    pub static ref CORE: RwLock<Arc<Unique>> = init_keywords();
 }
 
 #[test]
@@ -116,45 +116,45 @@ fn test_keywords() {
     // Initial state
     println!(
         "Init state len = {:?} state = {:?}",
-        Keywords::len(&CORE),
-        Keywords::current(&CORE)
+        Unique::len(&CORE),
+        Unique::current(&CORE)
     );
 
-    let e1 = Keywords::current(&CORE);
+    let e1 = Unique::current(&CORE);
 
     // Call init_static
     println!(
         "New state len = {:?} state = {:?}",
-        Keywords::len(&CORE),
-        Keywords::current(&CORE)
+        Unique::len(&CORE),
+        Unique::current(&CORE)
     );
 
-    let e2 = Keywords::current(&CORE);
+    let e2 = Unique::current(&CORE);
 
     // add first keyword
-    let o = Keywords::get_key(&String::from("essai"), &CORE);
+    let o = Unique::get_key(&String::from("essai"), &CORE);
     println!(
         "add essai len = {:?} state = {:?}",
-        Keywords::len(&CORE),
-        Keywords::current(&CORE)
+        Unique::len(&CORE),
+        Unique::current(&CORE)
     );
 
-    let e3 = Keywords::current(&CORE);
+    let e3 = Unique::current(&CORE);
 
     // add second keyword
-    Keywords::get_key(&"essai2".to_string(), &CORE);
+    Unique::get_key(&"essai2".to_string(), &CORE);
     println!(
         "add essai2 len = {:?} state = {:?}",
-        Keywords::len(&CORE),
-        Keywords::current(&CORE)
+        Unique::len(&CORE),
+        Unique::current(&CORE)
     );
 
-    let e4 = Keywords::current(&CORE);
+    let e4 = Unique::current(&CORE);
 
     // display existing keywords
-    println!("Keyword 0 = \"{}\"", Keywords::get_id(0, &CORE));
-    println!("Keyword 1 = \"{}\"", Keywords::get_id(1, &CORE));
-    println!("Keyword 2 = \"{}\"", Keywords::get_id(2, &CORE));
+    println!("Keyword 0 = \"{}\"", Unique::get_id(0, &CORE));
+    println!("Keyword 1 = \"{}\"", Unique::get_id(1, &CORE));
+    println!("Keyword 2 = \"{}\"", Unique::get_id(2, &CORE));
 
     // Verify persistant state
     println!("State 1 = {:?}", e1);

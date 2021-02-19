@@ -6,17 +6,18 @@
 #![allow(bare_trait_objects)]
 
 pub mod class;
-pub mod keywords;
+pub mod globals;
 pub mod object;
 pub mod phashmap;
+pub mod pvector;
+pub mod rustobj;
+pub mod unique;
 
 // pub mod implementation;
 // pub mod member;
 // pub mod protocol;
 // pub mod prototype;
-// pub mod rust_obj;
 // pub mod hashset;
-// pub mod vector;
 // pub mod function;
 
 #[cfg(test)]

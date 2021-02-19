@@ -27,7 +27,7 @@ pub struct Object {
     pub inner: Option<Arc<IObject>>,
 }
 
-castable_to!(Object => IObject);
+castable_to!(Object => [sync] IObject);
 
 impl Object {
     pub fn new<T: Inner>(obj: T) -> Object {
@@ -70,15 +70,15 @@ pub trait IObject: CastFromSync {
     fn get_class<'a>(&self) -> &'a Class;
 
     /// Call named `method` with `Object`s arguments
-    fn call(&self, name: &str, obj: &Object, args: &[Object]) -> Object;
+    fn call(&self, name: &str, args: &[Object]) -> Object;
 
     /// Call getter for a named `member`
-    fn get(&self, name: &str, obj: &Object) -> Object;
+    fn get(&self, name: &str) -> Object;
 
     /// Return string representation of
-    fn to_string(&self, obj: &Object) -> String;
+    fn to_string(&self) -> String;
 
-    fn get_hash(&self, obj: &Object) -> usize;
+    fn get_hash(&self) -> usize;
 
     // fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
     //     f.write_str(&self.to_string(self)
@@ -100,17 +100,17 @@ impl IObject for Object {
         }
     }
 
-    fn call(&self, name: &str, obj: &Object, args: &[Object]) -> Object {
+    fn call(&self, name: &str, args: &[Object]) -> Object {
         match self.clone().inner {
             None => panic!("Call on nil"),
             Some(o) => {
                 let a = o.clone();
-                o.get_class().call(name, obj, args)
+                o.get_class().call(name, args)
             }
         }
     }
 
-    fn get(&self, name: &str, obj: &Object) -> Object {
+    fn get(&self, name: &str) -> Object {
         match self.clone().inner {
             None => panic!("Getter on nil"),
             Some(o) => {
@@ -120,7 +120,7 @@ impl IObject for Object {
         }
     }
 
-    fn to_string(&self, obj: &Object) -> String {
+    fn to_string(&self) -> String {
         match self.clone().inner {
             None => String::from(NILSTRING),
             Some(o) => {
@@ -130,7 +130,7 @@ impl IObject for Object {
         }
     }
 
-    fn get_hash(&self, obj: &Object) -> usize {
+    fn get_hash(&self) -> usize {
         match self.clone().inner {
             None => 0,
             Some(o) => {

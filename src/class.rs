@@ -5,9 +5,9 @@ use intertrait::*;
 use std::sync::Arc;
 use std::{any::*, fmt::*, result::*, sync::*};
 
-use super::keywords::*;
 use super::object::*;
 use super::phashmap::*;
+use super::unique::*;
 
 /// ## Clojure Class descriptor for Class :
 /// ``` clojure
@@ -61,7 +61,7 @@ impl Class {
         println!("Class::init");
 
         // Insures all is initialized
-        Keywords::init();
+        Unique::init();
         Object::init();
         PHashMap::init();
         // let c = Keywords::get("clojure.rust.object/Objects");
