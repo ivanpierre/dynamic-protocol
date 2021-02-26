@@ -16,15 +16,16 @@ impl RustObj {
             obj: PVector::new(),
         }
     }
+
     fn new_vect(new: PVector) -> RustObj {
         RustObj { obj: new }
     }
 
-    pub fn update(&self, index: usize, value: &Object) -> RustObj {
+    pub fn update(&self, index: usize, value: &SObject) -> RustObj {
         RustObj {
             obj: {
                 if index == self.obj.len() {
-                    self.obj.clone()
+                    self.obj.add(value)
                 } else {
                     self.obj.update(index, value)
                 }
@@ -32,7 +33,7 @@ impl RustObj {
         }
     }
 
-    pub fn get(&self, index: usize) -> Object {
+    pub fn get(&self, index: usize) -> SObject {
         self.obj.get(index)
     }
 
@@ -44,7 +45,7 @@ impl RustObj {
         INIT = true;
 
         // Insures all is initialized
-        Object::init();
+        SObject::init();
         PVector::init();
     }
 }

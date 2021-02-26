@@ -6,6 +6,7 @@
 #![allow(bare_trait_objects)]
 
 pub mod class;
+pub mod function;
 pub mod globals;
 pub mod object;
 pub mod phashmap;
@@ -18,7 +19,6 @@ pub mod unique;
 // pub mod protocol;
 // pub mod prototype;
 // pub mod hashset;
-// pub mod function;
 
 #[cfg(test)]
 mod tests {

@@ -5,27 +5,27 @@ use im::*;
 use intertrait::cast::*;
 use intertrait::*;
 use lazy_static::__Deref;
-use std::{any::*, fmt::*, result::*, sync::*};
+use std::{any::*, fmt::*, hash::*, result::*, sync::*};
 
 use super::class::*;
 use super::object::*;
 
 pub struct PVector {
-    inner: Vector<Object>,
+    inner: Vector<SObject>,
 }
 
-castable_to!(PVector => [sync] IObject);
+castable_to!(PVector => [sync] Object);
 
-impl IObject for PVector {
-    fn get_class<'a>(&self) -> &'a Class {
+impl Object for PVector {
+    fn get_class<'a>(&'a self) -> &'a Class {
         todo!()
     }
 
-    fn call(&self, name: &str, args: &[Object]) -> Object {
+    fn call(&self, name: &str, args: &[SObject]) -> SObject {
         todo!()
     }
 
-    fn get(&self, name: &str) -> Object {
+    fn get(&self, name: &str) -> SObject {
         todo!()
     }
 
@@ -39,35 +39,35 @@ impl IObject for PVector {
 }
 
 impl PVector {
-    pub fn new_vect(inner: Vector<Object>) -> Object {
+    pub fn new_vect(inner: Vector<SObject>) -> PVector {
         PVector { inner }
     }
 
-    pub fn new() -> Object {
-        Object::new::PVector(PVector {
+    pub fn new() -> PVector {
+        PVector {
             inner: Vector::new(),
-        })
+        }
     }
 
     pub fn len(&self) -> usize {
         self.inner.len()
     }
 
-    pub fn get(&self, index: usize) -> Object {
+    pub fn get(&self, index: usize) -> SObject {
         match self.inner.get(index) {
-            None => Object::null().clone(),
+            None => SObject::null().clone(),
             Some(o) => o.clone(),
         }
     }
 
-    pub fn update(&self, index: usize, value: &Object) -> PVector {
+    pub fn update(&self, index: usize, value: &SObject) -> PVector {
         let &mut vec = &mut self.inner;
         PVector {
             inner: vec.update(index, value.clone()),
         }
     }
 
-    pub fn add(&mut self, value: &Object) -> PVector {
+    pub fn add(&mut self, value: &SObject) -> PVector {
         let mut vect = &self.inner;
         vect.push_back(value.clone());
         PVector { inner: *vect }
@@ -81,23 +81,38 @@ impl PVector {
         INIT = true;
 
         // Insures all is initialized
-        Object::init();
+        SObject::init();
     }
 }
 
-impl Clone for PVector {
-    fn clone(&self) -> Self {
-        PVector {
-            inner: self.inner.clone(),
-        }
-    }
-}
+// impl Clone for PVector {
+//     fn clone(&self) -> Self {
+//         PVector {
+//             inner: self.inner.clone(),
+//         }
+//     }
+// }
 
-impl std::fmt::Debug for PVector {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let a = self;
-        f.write_str(&self.to_string(self))
-    }
-}
+// impl std::fmt::Debug for PVector {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+//         let a = self;
+//         f.write_str(&self.to_string())
+//     }
+// }
+
+// impl Hash for PVector {
+//     fn hash<H: Hasher>(&self, state: &mut H) {
+//         state.write_usize(self.get_hash())
+//     }
+
+//     fn hash_slice<H: Hasher>(data: &[Self], state: &mut H)
+//     where
+//         Self: Sized,
+//     {
+//         for piece in data {
+//             piece.hash(state);
+//         }
+//     }
+// }
 
 static mut INIT: bool = false;

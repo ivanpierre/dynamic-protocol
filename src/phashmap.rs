@@ -7,38 +7,36 @@ use std::{any::*, fmt::*, result::*, sync::*};
 use super::class::*;
 use super::object::*;
 
-// type PersistentHashMap = HashMap<Object, Object>;
-
 pub struct PHashMap {
-    inner: HashMap<Object, Object>,
+    inner: HashMap<SObject, SObject>,
 }
 
-castable_to!(PHashMap => IObject);
+castable_to!(PHashMap => Object);
 
-impl IObject for PHashMap {
-    fn get_class<'a>(&self) -> &'a Class {
+impl Object for PHashMap {
+    fn get_class<'a>(&'a self) -> &'a Class {
         todo!()
     }
 
-    fn call(&self, name: &str, obj: &Object, args: &[Object]) -> Object {
+    fn call(&self, name: &str, args: &[SObject]) -> SObject {
         todo!()
     }
 
-    fn get(&self, name: &str, obj: &Object) -> Object {
+    fn get(&self, name: &str) -> SObject {
         todo!()
     }
 
-    fn to_string(&self, obj: &Object) -> String {
+    fn to_string(&self) -> String {
         todo!()
     }
 
-    fn get_hash(&self, obj: &Object) -> usize {
+    fn get_hash(&self) -> usize {
         todo!()
     }
 }
 
 impl PHashMap {
-    pub fn new(inner: HashMap<Object, Object>) -> PHashMap {
+    pub fn new(inner: HashMap<SObject, SObject>) -> PHashMap {
         PHashMap { inner }
     }
 
@@ -50,7 +48,7 @@ impl PHashMap {
         INIT = true;
 
         // Insures all is initialized
-        Object::init();
+        SObject::init();
     }
 }
 

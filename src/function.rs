@@ -1,49 +1,63 @@
 //! Anonymous Function with multi-arity
+use lazy_static::{__Deref, lazy_static};
+use std::clone::Clone;
+use std::{any::*, fmt::*, hash::*, result::*, sync::*};
 
-use im::hashmap::HashMap;
+// use std::fmt::*;
+use intertrait::cast::*;
+use intertrait::*;
+
 use super::object::*;
-use super::rust_obj::*;
+use super::phashmap::*;
+use super::pvector::*;
+use super::rustobj::*;
 
 pub struct Function {
-    pub higher: Option<usize>,
-    pub func: HashMap<usize, Object>, // all implementations
+    pub multiary: Option<usize>,
+    pub func: PHashMap, // all implementations
 }
 
-impl Function {
-    pub fn new() -> Function {
-        Function {
-            higher: None,
-            func: HashMap::<usize, Object>::new(),
-        }
-    }
+castable_to!(Function => [sync] Object, IFunction);
 
-    pub fn get(&self, arity: usize) -> Object {
-        match self.higher {
+trait IFunction {
+    fn call(args: PVector) -> SObject {}
+
+    fn get(&self, arity: usize) -> SObject {}
+}
+
+impl IFunction for Function {
+    fn get(&self, arity: usize) -> SObject {
+        match self.multiary {
             Some(max) => {
                 if arity > max {
                     let implem = self.func.get(&max).unwrap().clone();
                     if implem.multiary {
                         implem.clone()
-                    } 
-                    else {
-                        RustObj::null()
+                    } else {
+                        SObject::null()
                     }
-                }
-                else {
+                } else {
                     let implem = self.func.get(&arity);
                     match implem {
                         Some(res) => res.clone(),
-                        None => RustObj::null(),
+                        None => SObject::null(),
                     }
                 }
             }
 
             // If no max => no implementation
-            None => RustObj::null()
+            None => SObject::null(),
         }
     }
 }
 
-pub fn init() {
-
+impl Function {
+    pub fn new() -> Function {
+        Function {
+            multiary: None,
+            func: HashMap::<usize, SObject>::new(),
+        }
+    }
 }
+
+pub fn init() {}

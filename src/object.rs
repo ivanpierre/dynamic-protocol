@@ -16,28 +16,28 @@ use intertrait::*;
 use super::class::*;
 // use super::rust_obj::*;
 
-pub trait Inner: IObject + Debug + Eq + Hash + CastFromSync {}
+pub trait Inner: Object + Debug + Eq + Hash + CastFromSync {}
 
 /// Basic definition of object inner link to real structure
 // pub type Inner = IObject;
 
 /// Basic definition of a dynamic object
 // pub type Object = Option<Arc<Inner>>;
-pub struct Object {
-    pub inner: Option<Arc<IObject>>,
+pub struct SObject {
+    pub inner: Option<Arc<Object>>,
 }
 
-castable_to!(Object => [sync] IObject);
+castable_to!(SObject => [sync] Object);
 
-impl Object {
-    pub fn new<T: Inner>(obj: T) -> Object {
-        Object {
+impl SObject {
+    pub fn new<T: Object>(obj: T) -> SObject {
+        SObject {
             inner: Some(Arc::new(obj)),
         }
     }
 
-    pub fn null() -> Object {
-        Object { inner: None }
+    pub fn null() -> SObject {
+        SObject { inner: None }
     }
 
     pub fn is_null(&self) -> bool {
@@ -65,24 +65,20 @@ impl Object {
 /// `IObject` `Protocol` for all defined `Object`s
 ///
 ///
-pub trait IObject: CastFromSync {
+pub trait Object: CastFromSync {
     /// Return `Class` of `Object`
-    fn get_class<'a>(&self) -> &'a Class;
+    fn get_class<'a>(&'a self) -> &'a Class;
 
     /// Call named `method` with `Object`s arguments
-    fn call(&self, name: &str, args: &[Object]) -> Object;
+    fn call(&self, name: &str, args: &[SObject]) -> SObject;
 
     /// Call getter for a named `member`
-    fn get(&self, name: &str) -> Object;
+    fn get(&self, name: &str) -> SObject;
 
     /// Return string representation of
     fn to_string(&self) -> String;
 
     fn get_hash(&self) -> usize;
-
-    // fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-    //     f.write_str(&self.to_string(self)
-    // }
 }
 
 const NILSTRING: &str = "nil";
@@ -91,8 +87,8 @@ const NILSTRING: &str = "nil";
 ///
 /// Functions are applied to the `content` of `Object`
 // #[cast_to([sync] IObject, Debug)];
-impl IObject for Object {
-    fn get_class<'a>(&self) -> &'a Class {
+impl Object for SObject {
+    fn get_class<'a>(&'a self) -> &'a Class {
         if let Some(o) = self.clone().inner {
             o.get_class()
         } else {
@@ -100,7 +96,7 @@ impl IObject for Object {
         }
     }
 
-    fn call(&self, name: &str, args: &[Object]) -> Object {
+    fn call(&self, name: &str, args: &[SObject]) -> SObject {
         match self.clone().inner {
             None => panic!("Call on nil"),
             Some(o) => {
@@ -110,12 +106,13 @@ impl IObject for Object {
         }
     }
 
-    fn get(&self, name: &str) -> Object {
+    fn get(&self, name: &str) -> SObject {
         match self.clone().inner {
             None => panic!("Getter on nil"),
             Some(o) => {
                 let a = o.clone();
-                a.get_class().get(name, obj)
+                let b = a.get_class();
+                b.get(name)
             }
         }
     }
@@ -125,7 +122,7 @@ impl IObject for Object {
             None => String::from(NILSTRING),
             Some(o) => {
                 let a = o.clone();
-                a.get_class().to_string(obj)
+                a.get_class().to_string()
             }
         }
     }
@@ -135,46 +132,86 @@ impl IObject for Object {
             None => 0,
             Some(o) => {
                 let a = o.clone();
-                a.get_class().get_hash(obj)
+                a.get_class().get_hash()
             }
         }
     }
 }
 
-impl std::fmt::Debug for Object {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let a = self;
-        f.write_str(&self.to_string(self))
+impl<T> Object for T
+where
+    T: Inner,
+{
+    fn get_class<'a>(&'a self) -> &'a Class {
+        todo!()
+    }
+
+    fn call(&self, name: &str, args: &[SObject]) -> SObject {
+        todo!()
+    }
+
+    fn get(&self, name: &str) -> SObject {
+        todo!()
+    }
+
+    fn to_string(&self) -> String {
+        todo!()
+    }
+
+    fn get_hash(&self) -> usize {
+        todo!()
     }
 }
 
-impl Clone for Object {
+impl std::fmt::Debug for SObject {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let a = self;
+        f.write_str(&self.to_string())
+    }
+}
+
+impl Clone for SObject {
     fn clone_from(&mut self, source: &Self) {
         *self = source.clone();
     }
 
     fn clone(&self) -> Self {
-        let Object { inner } = self;
+        let SObject { inner } = self;
         match inner {
-            None => Object { inner: None },
-            Some(o) => Object {
+            None => SObject { inner: None },
+            Some(o) => SObject {
                 inner: Some(o.clone()),
             },
         }
     }
 }
 
-impl Eq for Object {}
+impl Eq for SObject {}
 
-impl PartialEq for Object {
+impl PartialEq for SObject {
     fn eq(&self, other: &Self) -> bool {
         todo!()
     }
 }
 
+impl Hash for SObject {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write_usize(self.get_hash())
+    }
+
+    fn hash_slice<H: Hasher>(data: &[Self], state: &mut H)
+    where
+        Self: Sized,
+    {
+        for piece in data {
+            piece.hash(state);
+        }
+    }
+}
+
 impl Hash for Object {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        todo!()
+        state.write_usize(self.get_hash())
     }
 }
 
